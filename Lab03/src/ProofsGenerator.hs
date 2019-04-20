@@ -3,16 +3,8 @@ module ProofsGenerator where
 import           Data.List
 import qualified Data.Map.Strict as Map
 import qualified Data.Set        as Set
+import           Debug.Trace
 import           Grammar
-import Debug.Trace
--- import           Main
-
-showProof' :: [Expr] -> IO ()
-showProof' (a : part) = do
-    putStr "Debug: "
-    putStrLn $ show $ a
-    showProof' part
-showProof' [] = putStr ""
 
 genProof :: Expr -> Map.Map Expr Int -> Map.Map Expr [Expr] -> Set.Set Expr -> [Expr]
 genProof e hyps rToAll proofed = proof
@@ -26,8 +18,6 @@ genProof e hyps rToAll proofed = proof
             False -> case e of
                 (Binary Impl (Not (Not a)) b) | a == b -> proofAx10 e
                 _ -> proofMp e hyps rToAll proofed
-
-
 
 proofMp :: Expr -> Map.Map Expr Int -> Map.Map Expr [Expr] -> Set.Set Expr -> [Expr]
 proofMp e hyps rToAll proofed = proof where
@@ -80,12 +70,6 @@ ax9 a b = Binary Impl (Binary Impl a b) (Binary Impl (Binary Impl a (Not b)) (No
 mp :: Expr -> Expr
 mp (Binary Impl a b) = b
 
--- fillData :: [Expr] -> Map.Map Expr [Expr] -> Map.Map Expr [Expr]
--- fillData [] p = p
--- fillData (e : part) m = case e of
---     (Binary Impl a b) -> fillData part (Map.insertWith (++) b m)
---     _ -> fillData part m
-
 lemAtoA :: Expr -> [Expr]
 lemAtoA a = proof where
     l1 = ax1 a a
@@ -128,25 +112,10 @@ genDed'' hyps h (e : rest) rToAll was newProof = genDed'' hyps h rest newRToAll 
         _                 -> rToAll
     t = newProof ++ prOfe
 
-
--- cra :: Expr -> Set.Set Expr -> IO String
--- cra e s = do
---     putStrLn ("00000 " ++ (show e) ++ " 00000") 
---     return $show$Set.member e s 
-
-
--- findParts :: Expr -> [Expr] -> Set.Set Expr -> (Expr, Expr)
--- findParts e ((Binary Impl a b) : rest) s = let r= extracr $ cra e s in case r of
---     "True"  -> (a, Binary Impl a b)
---     False -> findParts e rest s 
-
-
 findParts :: Expr -> [Expr] -> Set.Set Expr -> (Expr, Expr)
--- findParts e [] s = (f, f) where f = Binary Impl e (Binary Impl e (Var "EBAT TI LOX"))
 findParts e ((Binary Impl a b) : rest) s = case Set.member a s of
     True  -> (a, Binary Impl a b)
     False -> findParts e rest s
-
 
 axProof :: Expr -> Expr -> [Expr]
 axProof h e = proof where
@@ -154,7 +123,6 @@ axProof h e = proof where
     l2 = ax1 e h
     l3 = mp l2
     proof = (l1 : l2 : l3 : [])
-
 
 proofAx10 :: Expr -> [Expr]
 proofAx10 (Binary Impl nna a) = proof where
@@ -172,9 +140,7 @@ proofAx10 (Binary Impl nna a) = proof where
     l7 = mp l6'
     l8 = mp l1
     l9 = mp l8
-    -- cratch = Binary Impl ((()))
     proof = (l1:l2:l3) ++ (l4:l5:l6) ++ (l7:l8:l9:[])
-    -- proof = [l5]
 
 cpProof :: Expr -> Expr -> [Expr]
 cpProof a b = proof where
